@@ -35,7 +35,10 @@ blockchain-demo/
 
 ## 🚀 快速开始
 
-### 1. **Web演示（推荐）**
+### 1. **在线演示（推荐）**
+🌐 **直接访问**: [https://pengsihan867-lang.github.io/blockchain-demo](https://pengsihan867-lang.github.io/blockchain-demo)
+
+### 2. **本地运行**
 ```bash
 # 直接在浏览器中打开
 open blockchain_demo.html

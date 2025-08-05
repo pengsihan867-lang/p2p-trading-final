@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>区块链结算系统演示 - GitHub Pages</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 10px 25px rgba(108, 117, 125, 0.4);
+        }
+
+        .features {
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .feature {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+        }
+
+        .feature h3 {
+            margin-bottom: 10px;
+            color: #28a745;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 30px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚀</div>
+        <h1>区块链结算系统演示</h1>
+        <p>一个完整的区块链入门项目，包含智能合约开发、Web3交互和现代化Web界面演示。</p>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🔗 智能合约</h3>
+                <p>基于Solidity的ERC-20代币合约，支持转账记录和批量转账功能</p>
+            </div>
+            <div class="feature">
+                <h3>🌐 Web界面</h3>
+                <p>现代化响应式设计，MetaMask钱包集成，实时交易演示</p>
+            </div>
+            <div class="feature">
+                <h3>🐍 Python后端</h3>
+                <p>Web3.py与区块链交互，智能合约部署脚本，完整的API示例</p>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在加载区块链演示...</p>
+        </div>
+
+        <div>
+            <a href="blockchain_demo.html" class="btn" onclick="showLoading()">
+                🚀 开始体验
+            </a>
+            <a href="https://github.com/pengsihan867-lang/blockchain-demo" class="btn btn-secondary" target="_blank">
+                📚 查看源码
+            </a>
+        </div>
+
+        <div style="margin-top: 30px; font-size: 0.9em; opacity: 0.7;">
+            <p>💡 提示：首次使用需要安装MetaMask钱包扩展</p>
+        </div>
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        // 自动重定向到演示页面（可选）
+        // setTimeout(() => {
+        //     window.location.href = 'blockchain_demo.html';
+        // }, 3000);
+    </script>
+</body>
+</html> 
