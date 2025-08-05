@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>区块链结算系统演示</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #28a745;
+        }
+
+        .status-bar.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .status-bar.warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .balance-display {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .balance-display h2 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .balance-display p {
+            opacity: 0.9;
+        }
+
+        .transaction-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .transaction-item h4 {
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .transaction-item p {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 3px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .network-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .network-info h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .network-info p {
+            color: #424242;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 区块链结算系统演示</h1>
+            <p>基于以太坊的智能合约交互演示</p>
+        </div>
+
+        <div class="main-content">
+            <!-- 状态栏 -->
+            <div id="statusBar" class="status-bar">
+                <div class="spinner"></div>
+                <p>正在连接到区块链网络...</p>
+            </div>
+
+            <!-- 网络信息 -->
+            <div id="networkInfo" class="network-info" style="display: none;">
+                <h4>🌐 网络信息</h4>
+                <p><strong>网络:</strong> <span id="networkName">-</span></p>
+                <p><strong>账户:</strong> <span id="userAccount">-</span></p>
+                <p><strong>余额:</strong> <span id="ethBalance">-</span> ETH</p>
+            </div>
+
+            <!-- 代币余额 -->
+            <div id="tokenBalance" class="balance-display" style="display: none;">
+                <h2 id="tokenBalanceAmount">0</h2>
+                <p>SETT 代币余额</p>
+            </div>
+
+            <div class="grid">
+                <!-- 连接钱包 -->
+                <div class="card">
+                    <h3>🔗 连接钱包</h3>
+                    <p style="margin-bottom: 15px; color: #6c757d;">
+                        连接您的MetaMask钱包以开始使用
+                    </p>
+                    <button id="connectWallet" class="btn">连接 MetaMask</button>
+                </div>
+
+                <!-- 转账功能 -->
+                <div class="card">
+                    <h3>💸 转账代币</h3>
+                    <div class="form-group">
+                        <label for="recipientAddress">接收方地址:</label>
+                        <input type="text" id="recipientAddress" placeholder="0x...">
+                    </div>
+                    <div class="form-group">
+                        <label for="transferAmount">转账金额:</label>
+                        <input type="number" id="transferAmount" placeholder="100" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="transferDescription">交易描述:</label>
+                        <textarea id="transferDescription" placeholder="转账说明" rows="2"></textarea>
+                    </div>
+                    <button id="transferTokens" class="btn btn-success" disabled>转账</button>
+                </div>
+
+                <!-- 批量转账 -->
+                <div class="card">
+                    <h3>📦 批量转账</h3>
+                    <div class="form-group">
+                        <label for="batchAddresses">接收方地址 (每行一个):</label>
+                        <textarea id="batchAddresses" placeholder="0x...&#10;0x...&#10;0x..." rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="batchAmounts">转账金额 (每行一个):</label>
+                        <textarea id="batchAmounts" placeholder="100&#10;200&#10;300" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="batchDescription">交易描述:</label>
+                        <input type="text" id="batchDescription" placeholder="批量转账">
+                    </div>
+                    <button id="batchTransfer" class="btn btn-success" disabled>批量转账</button>
+                </div>
+
+                <!-- 查询交易 -->
+                <div class="card">
+                    <h3>📊 查询交易</h3>
+                    <div class="form-group">
+                        <label for="queryAddress">查询地址:</label>
+                        <input type="text" id="queryAddress" placeholder="0x...">
+                    </div>
+                    <button id="queryTransactions" class="btn btn-secondary" disabled>查询交易</button>
+                    
+                    <div id="transactionList" class="transaction-list" style="margin-top: 15px; display: none;">
+                        <h4>交易记录:</h4>
+                        <div id="transactionItems"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作日志 -->
+            <div class="card">
+                <h3>📝 操作日志</h3>
+                <div id="logContainer" style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                    <p style="color: #6c757d;">等待操作...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let web3;
+        let userAccount;
+        let contract;
+        let contractAddress = '0x1234567890123456789012345678901234567890'; // 示例地址
+
+        // 合约ABI (简化版本)
+        const contractABI = [
+            {
+                "inputs": [
+                    {"name": "name", "type": "string"},
+                    {"name": "symbol", "type": "string"}
+                ],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "inputs": [{"name": "account", "type": "address"}],
+                "name": "balanceOf",
+                "outputs": [{"name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {"name": "to", "type": "address"},
+                    {"name": "amount", "type": "uint256"}
+                ],
+                "name": "transfer",
+                "outputs": [{"name": "", "type": "bool"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {"name": "to", "type": "address"},
+                    {"name": "amount", "type": "uint256"},
+                    {"name": "description", "type": "string"}
+                ],
+                "name": "transferWithRecord",
+                "outputs": [{"name": "", "type": "bool"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {"name": "recipients", "type": "address[]"},
+                    {"name": "amounts", "type": "uint256[]"},
+                    {"name": "description", "type": "string"}
+                ],
+                "name": "batchTransfer",
+                "outputs": [{"name": "", "type": "bool"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"name": "transactionId", "type": "uint256"}],
+                "name": "getTransaction",
+                "outputs": [
+                    {"name": "from", "type": "address"},
+                    {"name": "to", "type": "address"},
+                    {"name": "amount", "type": "uint256"},
+                    {"name": "timestamp", "type": "uint256"},
+                    {"name": "description", "type": "string"}
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"name": "user", "type": "address"}],
+                "name": "getUserTransactions",
+                "outputs": [{"name": "", "type": "uint256[]"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "transactionCount",
+                "outputs": [{"name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        // 初始化
+        async function init() {
+            try {
+                // 检查是否安装了MetaMask
+                if (typeof window.ethereum !== 'undefined') {
+                    web3 = new Web3(window.ethereum);
+                    log('✅ MetaMask 已检测到');
+                    
+                    // 监听账户变化
+                    window.ethereum.on('accountsChanged', function (accounts) {
+                        if (accounts.length > 0) {
+                            userAccount = accounts[0];
+                            updateUI();
+                        } else {
+                            userAccount = null;
+                            updateUI();
+                        }
+                    });
+
+                    // 监听网络变化
+                    window.ethereum.on('chainChanged', function (chainId) {
+                        window.location.reload();
+                    });
+
+                    updateStatus('✅ 已连接到 MetaMask', 'success');
+                } else {
+                    updateStatus('❌ 请安装 MetaMask 钱包', 'error');
+                    log('❌ 未检测到 MetaMask，请安装 MetaMask 扩展');
+                }
+            } catch (error) {
+                updateStatus('❌ 连接失败: ' + error.message, 'error');
+                log('❌ 初始化失败: ' + error.message);
+            }
+        }
+
+        // 连接钱包
+        async function connectWallet() {
+            try {
+                if (!web3) {
+                    log('❌ 请先安装 MetaMask');
+                    return;
+                }
+
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                userAccount = accounts[0];
+                
+                log('✅ 钱包连接成功: ' + userAccount.substring(0, 10) + '...');
+                updateUI();
+                updateStatus('✅ 钱包已连接', 'success');
+            } catch (error) {
+                log('❌ 连接钱包失败: ' + error.message);
+                updateStatus('❌ 连接失败', 'error');
+            }
+        }
+
+        // 更新UI
+        async function updateUI() {
+            if (!userAccount) {
+                document.getElementById('networkInfo').style.display = 'none';
+                document.getElementById('tokenBalance').style.display = 'none';
+                document.getElementById('transferTokens').disabled = true;
+                document.getElementById('batchTransfer').disabled = true;
+                document.getElementById('queryTransactions').disabled = true;
+                return;
+            }
+
+            try {
+                // 更新网络信息
+                const networkId = await web3.eth.net.getId();
+                const networkName = getNetworkName(networkId);
+                const ethBalance = await web3.eth.getBalance(userAccount);
+                const ethBalanceFormatted = web3.utils.fromWei(ethBalance, 'ether');
+
+                document.getElementById('networkName').textContent = networkName;
+                document.getElementById('userAccount').textContent = userAccount.substring(0, 10) + '...';
+                document.getElementById('ethBalance').textContent = parseFloat(ethBalanceFormatted).toFixed(4);
+                document.getElementById('networkInfo').style.display = 'block';
+
+                // 更新代币余额
+                if (contract) {
+                    try {
+                        const tokenBalance = await contract.methods.balanceOf(userAccount).call();
+                        const tokenBalanceFormatted = web3.utils.fromWei(tokenBalance, 'ether');
+                        document.getElementById('tokenBalanceAmount').textContent = parseFloat(tokenBalanceFormatted).toFixed(2);
+                        document.getElementById('tokenBalance').style.display = 'block';
+                    } catch (error) {
+                        log('⚠️ 无法获取代币余额: ' + error.message);
+                    }
+                }
+
+                // 启用按钮
+                document.getElementById('transferTokens').disabled = false;
+                document.getElementById('batchTransfer').disabled = false;
+                document.getElementById('queryTransactions').disabled = false;
+
+            } catch (error) {
+                log('❌ 更新UI失败: ' + error.message);
+            }
+        }
+
+        // 获取网络名称
+        function getNetworkName(networkId) {
+            const networks = {
+                1: 'Ethereum Mainnet',
+                3: 'Ropsten Testnet',
+                4: 'Rinkeby Testnet',
+                5: 'Goerli Testnet',
+                42: 'Kovan Testnet',
+                1337: 'Local Network',
+                5777: 'Ganache'
+            };
+            return networks[networkId] || 'Unknown Network';
+        }
+
+        // 转账代币
+        async function transferTokens() {
+            const recipient = document.getElementById('recipientAddress').value.trim();
+            const amount = document.getElementById('transferAmount').value;
+            const description = document.getElementById('transferDescription').value.trim();
+
+            if (!recipient || !amount) {
+                log('❌ 请填写接收方地址和转账金额');
+                return;
+            }
+
+            if (!web3.utils.isAddress(recipient)) {
+                log('❌ 无效的接收方地址');
+                return;
+            }
+
+            try {
+                const amountWei = web3.utils.toWei(amount, 'ether');
+                
+                // 这里应该调用实际的合约方法
+                // 由于这是演示版本，我们模拟交易
+                log('🔄 正在处理转账...');
+                
+                // 模拟交易延迟
+                setTimeout(() => {
+                    log('✅ 转账成功！');
+                    log(`💸 转账 ${amount} SETT 到 ${recipient.substring(0, 10)}...`);
+                    if (description) {
+                        log(`📝 描述: ${description}`);
+                    }
+                    updateUI();
+                }, 2000);
+
+            } catch (error) {
+                log('❌ 转账失败: ' + error.message);
+            }
+        }
+
+        // 批量转账
+        async function batchTransfer() {
+            const addressesText = document.getElementById('batchAddresses').value.trim();
+            const amountsText = document.getElementById('batchAmounts').value.trim();
+            const description = document.getElementById('batchDescription').value.trim();
+
+            if (!addressesText || !amountsText) {
+                log('❌ 请填写地址和金额');
+                return;
+            }
+
+            const addresses = addressesText.split('\n').filter(addr => addr.trim());
+            const amounts = amountsText.split('\n').filter(amt => amt.trim());
+
+            if (addresses.length !== amounts.length) {
+                log('❌ 地址和金额数量不匹配');
+                return;
+            }
+
+            // 验证地址
+            for (let addr of addresses) {
+                if (!web3.utils.isAddress(addr.trim())) {
+                    log('❌ 无效地址: ' + addr);
+                    return;
+                }
+            }
+
+            try {
+                log('🔄 正在处理批量转账...');
+                
+                // 模拟批量转账
+                setTimeout(() => {
+                    log('✅ 批量转账成功！');
+                    log(`📦 转账到 ${addresses.length} 个地址`);
+                    for (let i = 0; i < addresses.length; i++) {
+                        log(`  ${i + 1}. ${addresses[i].substring(0, 10)}...: ${amounts[i]} SETT`);
+                    }
+                    if (description) {
+                        log(`📝 描述: ${description}`);
+                    }
+                    updateUI();
+                }, 3000);
+
+            } catch (error) {
+                log('❌ 批量转账失败: ' + error.message);
+            }
+        }
+
+        // 查询交易
+        async function queryTransactions() {
+            const address = document.getElementById('queryAddress').value.trim() || userAccount;
+
+            if (!web3.utils.isAddress(address)) {
+                log('❌ 无效的地址');
+                return;
+            }
+
+            try {
+                log('🔍 正在查询交易记录...');
+                
+                // 模拟查询交易记录
+                setTimeout(() => {
+                    const mockTransactions = [
+                        {
+                            id: 1,
+                            from: '0x1234...5678',
+                            to: address.substring(0, 10) + '...',
+                            amount: '100',
+                            timestamp: new Date().toLocaleString(),
+                            description: '测试转账'
+                        },
+                        {
+                            id: 2,
+                            from: address.substring(0, 10) + '...',
+                            to: '0x8765...4321',
+                            amount: '50',
+                            timestamp: new Date(Date.now() - 3600000).toLocaleString(),
+                            description: '购买商品'
+                        }
+                    ];
+
+                    displayTransactions(mockTransactions);
+                    log('✅ 查询完成，找到 ' + mockTransactions.length + ' 笔交易');
+                }, 1500);
+
+            } catch (error) {
+                log('❌ 查询失败: ' + error.message);
+            }
+        }
+
+        // 显示交易记录
+        function displayTransactions(transactions) {
+            const container = document.getElementById('transactionItems');
+            const listContainer = document.getElementById('transactionList');
+            
+            if (transactions.length === 0) {
+                container.innerHTML = '<p style="color: #6c757d;">暂无交易记录</p>';
+            } else {
+                container.innerHTML = transactions.map(tx => `
+                    <div class="transaction-item">
+                        <h4>交易 #${tx.id}</h4>
+                        <p><strong>发送方:</strong> ${tx.from}</p>
+                        <p><strong>接收方:</strong> ${tx.to}</p>
+                        <p><strong>金额:</strong> ${tx.amount} SETT</p>
+                        <p><strong>时间:</strong> ${tx.timestamp}</p>
+                        <p><strong>描述:</strong> ${tx.description}</p>
+                    </div>
+                `).join('');
+            }
+            
+            listContainer.style.display = 'block';
+        }
+
+        // 更新状态
+        function updateStatus(message, type = 'success') {
+            const statusBar = document.getElementById('statusBar');
+            statusBar.className = `status-bar ${type}`;
+            statusBar.innerHTML = `<p>${message}</p>`;
+        }
+
+        // 日志记录
+        function log(message) {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('p');
+            logEntry.innerHTML = `<span style="color: #6c757d;">[${timestamp}]</span> ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // 事件监听
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+            
+            document.getElementById('connectWallet').addEventListener('click', connectWallet);
+            document.getElementById('transferTokens').addEventListener('click', transferTokens);
+            document.getElementById('batchTransfer').addEventListener('click', batchTransfer);
+            document.getElementById('queryTransactions').addEventListener('click', queryTransactions);
+        });
+
+        // 演示模式提示
+        setTimeout(() => {
+            log('💡 提示: 这是一个演示版本，所有交易都是模拟的');
+            log('🔧 要使用真实功能，请部署智能合约并更新合约地址');
+        }, 3000);
+    </script>
+</body>
+</html> 

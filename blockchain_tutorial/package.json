@@ -1,0 +1,43 @@
+{
+  "name": "blockchain-settlement-system",
+  "version": "1.0.0",
+  "description": "入门级区块链结算系统 - 帮助理解区块链基本概念",
+  "main": "index.js",
+  "scripts": {
+    "start": "ganache-cli --port 7545 --network-id 1337",
+    "compile": "solc --bin --abi contracts/SettlementToken.sol -o python/build/ --overwrite",
+    "deploy": "cd python && python deploy_contract.py",
+    "test": "cd python && python example_usage.py",
+    "install-deps": "pip install -r python/requirements.txt"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "solidity",
+    "smart-contracts",
+    "python",
+    "web3",
+    "ganache",
+    "tutorial"
+  ],
+  "author": "Blockchain Tutorial",
+  "license": "MIT",
+  "devDependencies": {
+    "ganache-cli": "^6.12.2"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.3"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/blockchain-tutorial.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/blockchain-tutorial/issues"
+  },
+  "homepage": "https://github.com/your-username/blockchain-tutorial#readme"
+} 

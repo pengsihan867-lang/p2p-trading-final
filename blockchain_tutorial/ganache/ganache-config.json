@@ -1,0 +1,92 @@
+{
+  "server": {
+    "port": 7545,
+    "hostname": "127.0.0.1"
+  },
+  "wallet": {
+    "totalAccounts": 10,
+    "deterministic": true,
+    "mnemonic": "test test test test test test test test test test test junk",
+    "passphrase": "",
+    "accountKeysPath": "",
+    "accounts": [],
+    "accountsAndKeys": [],
+    "numberOfAccounts": 10,
+    "defaultBalance": 1000
+  },
+  "chain": {
+    "chainId": 1337,
+    "networkId": 1337,
+    "hardfork": "london",
+    "vmErrorsOnRPCResponse": true,
+    "allowUnlimitedContractSize": false,
+    "initialDate": null,
+    "time": null,
+    "blockTime": 0,
+    "gasLimit": 6721975,
+    "gasPrice": "20000000000",
+    "maxFeePerGas": null,
+    "maxPriorityFeePerGas": null,
+    "fork": null,
+    "fork_block_number": null,
+    "fork_network_id": null,
+    "fork_chain_id": null,
+    "hardfork": "london",
+    "vmErrorsOnRPCResponse": true,
+    "allowUnlimitedContractSize": false,
+    "initialDate": null,
+    "time": null,
+    "blockTime": 0,
+    "gasLimit": 6721975,
+    "gasPrice": "20000000000",
+    "maxFeePerGas": null,
+    "maxPriorityFeePerGas": null,
+    "fork": null,
+    "fork_block_number": null,
+    "fork_network_id": null,
+    "fork_chain_id": null
+  },
+  "logging": {
+    "quiet": false,
+    "verbose": false,
+    "logger": {
+      "log": false
+    }
+  },
+  "miner": {
+    "instamine": "strict",
+    "blockTime": 0,
+    "iterations": 0
+  },
+  "db_path": "./chaindata",
+  "account_keys_path": "",
+  "hostname": "127.0.0.1",
+  "port": 7545,
+  "network_id": 1337,
+  "chain_id": 1337,
+  "total_accounts": 10,
+  "unlocked_accounts": [],
+  "locked_accounts": [],
+  "default_balance_ether": 1000,
+  "deterministic": true,
+  "mnemonic": "test test test test test test test test test test test junk",
+  "block_time": 0,
+  "gas_limit": 6721975,
+  "gas_price": "20000000000",
+  "hardfork": "london",
+  "vmErrorsOnRPCResponse": true,
+  "allowUnlimitedContractSize": false,
+  "initialDate": null,
+  "time": null,
+  "fork": null,
+  "fork_block_number": null,
+  "fork_network_id": null,
+  "fork_chain_id": null,
+  "quiet": false,
+  "verbose": false,
+  "logger": {
+    "log": false
+  },
+  "instamine": "strict",
+  "iterations": 0
+} 
