@@ -371,6 +371,39 @@ window.addEventListener("DOMContentLoaded", () => {
     window.open('ledger.html', '_blank');
   });
   lastRun = run();
+  // Wallet overlay logic
+  const overlay = document.getElementById('connectOverlay');
+  const showOverlay = () => overlay.classList.remove('hidden');
+  const hideOverlay = () => overlay.classList.add('hidden');
+  document.getElementById('overlayConnect').addEventListener('click', async () => {
+    const ctx = await connectMetaMask();
+    if (ctx) {
+      hideOverlay();
+      try { localStorage.setItem('solarcoin_wallet_seen', '1'); } catch {}
+    }
+  });
+  document.getElementById('overlaySepolia').addEventListener('click', switchToSepolia);
+  document.getElementById('overlaySkip').addEventListener('click', hideOverlay);
+
+  // Try silent connect; if not connected and first visit, show overlay
+  (async () => {
+    if (!window.ethereum) return; // no wallet
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const accts = await provider.send('eth_accounts', []);
+      if (accts && accts.length > 0) {
+        const signer = await provider.getSigner();
+        const net = await provider.getNetwork();
+        document.getElementById('walletInfo').textContent = `Connected: ${accts[0]} | chainId ${Number(net.chainId)}`;
+        try { localStorage.setItem('solarcoin_wallet_seen', '1'); } catch {}
+      } else {
+        const seen = localStorage.getItem('solarcoin_wallet_seen');
+        if (!seen) showOverlay();
+      }
+    } catch {
+      // ignore
+    }
+  })();
 });
 
 // ---------------------- MetaMask / Ethers demo ----------------------

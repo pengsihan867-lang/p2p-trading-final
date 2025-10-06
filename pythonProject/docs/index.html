@@ -48,27 +48,30 @@
     <section class="cards">
       <div class="card">
         <h2>Wallet & On‑chain Demo (MetaMask, optional)</h2>
-        <p class="hint">Connect MetaMask to view your address and test ERC‑20 interactions on a test network. Provide an ERC‑20 token address if you want to try approve/transfer. This page does not hold keys and signs only in your wallet.</p>
+        <p class="hint">Connect MetaMask to view your address. On first visit, a popup will ask for permission. Advanced ERC‑20 demo is collapsed below.</p>
         <div class="row" style="flex-wrap: wrap; gap:10px; margin-bottom: 8px;">
           <button id="connectBtn">Connect MetaMask</button>
           <button id="switchSepoliaBtn">Switch to Sepolia</button>
           <span id="walletInfo" class="hint"></span>
         </div>
-        <div class="grid-2">
-          <div>
-            <h3>Token Settings</h3>
-            <div class="row"><label style="width:160px">ERC‑20 token address</label><input id="tokenAddr" style="width:360px" placeholder="0x..." /></div>
-            <div class="row"><label style="width:160px">Settlement address</label><input id="settleAddr" style="width:360px" placeholder="0x... (spender)" /></div>
-            <div class="row"><label style="width:160px">Approve amount (SLR)</label><input id="approveAmt" type="number" step="0.01" value="10" /></div>
-            <div class="row"><button id="approveBtn">Approve</button><span id="approveMsg" class="hint"></span></div>
+        <details>
+          <summary style="cursor:pointer; color:#e6ebff; margin:8px 0;">Advanced: ERC‑20 token demo (optional)</summary>
+          <div class="grid-2">
+            <div>
+              <h3>Token Settings</h3>
+              <div class="row"><label style="width:160px">ERC‑20 token address</label><input id="tokenAddr" style="width:360px" placeholder="0x..." /></div>
+              <div class="row"><label style="width:160px">Settlement address</label><input id="settleAddr" style="width:360px" placeholder="0x... (spender)" /></div>
+              <div class="row"><label style="width:160px">Approve amount (SLR)</label><input id="approveAmt" type="number" step="0.01" value="10" /></div>
+              <div class="row"><button id="approveBtn">Approve</button><span id="approveMsg" class="hint"></span></div>
+            </div>
+            <div>
+              <h3>Simple Transfer</h3>
+              <div class="row"><label style="width:160px">To address</label><input id="transferTo" style="width:360px" placeholder="0x..." /></div>
+              <div class="row"><label style="width:160px">Amount (SLR)</label><input id="transferAmt" type="number" step="0.01" value="1" /></div>
+              <div class="row"><button id="transferBtn">Transfer</button><span id="transferMsg" class="hint"></span></div>
+            </div>
           </div>
-          <div>
-            <h3>Simple Transfer</h3>
-            <div class="row"><label style="width:160px">To address</label><input id="transferTo" style="width:360px" placeholder="0x..." /></div>
-            <div class="row"><label style="width:160px">Amount (SLR)</label><input id="transferAmt" type="number" step="0.01" value="1" /></div>
-            <div class="row"><button id="transferBtn">Transfer</button><span id="transferMsg" class="hint"></span></div>
-          </div>
-        </div>
+        </details>
       </div>
     </section>
 
@@ -113,5 +116,18 @@
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.12.1/dist/ethers.umd.min.js"></script>
     <script src="app.js"></script>
+
+    <!-- Connect overlay -->
+    <div id="connectOverlay" class="overlay hidden">
+      <div class="overlay-card">
+        <h2>Connect your wallet</h2>
+        <p class="hint">We’ll ask your MetaMask for permission. You can also switch to Sepolia testnet.</p>
+        <div class="row" style="gap:10px; justify-content:center; margin-top:10px;">
+          <button id="overlayConnect">Connect MetaMask</button>
+          <button id="overlaySepolia">Switch to Sepolia</button>
+          <button id="overlaySkip" class="ghost">Skip</button>
+        </div>
+      </div>
+    </div>
   </body>
   </html>
