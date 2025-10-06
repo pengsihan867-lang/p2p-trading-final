@@ -65,3 +65,8 @@ footer { text-align: center; color: var(--muted); padding: 20px; font-size: 12px
   .grid-2 { grid-template-columns: 1fr; }
 }
 
+/* Overlay for first-time wallet connect */
+.overlay { position: fixed; inset: 0; background: rgba(5,7,15,0.72); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.overlay.hidden { display: none; }
+.overlay-card { width: min(560px, 92%); background: var(--card); padding: 18px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.45); }
+.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.18); color: var(--text); }
