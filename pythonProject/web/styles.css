@@ -76,3 +76,14 @@ footer { text-align: center; color: var(--muted); padding: 20px; font-size: 12px
 .badge.ok { background: linear-gradient(90deg, #329d6f, #63d297); color: #0a101f; border-color: rgba(0,0,0,0); }
 .badge.err { background: rgba(255,124,181,0.15); color: #ffb3cf; border-color: rgba(255,124,181,0.4); }
 .hidden { display:none; }
+
+/* Tiny check icon */
+.checkmark {
+  display: inline-block; width: 14px; height: 14px; border-radius: 50%;
+  background: #0a101f; margin-right: 6px; position: relative; top: 2px;
+}
+.ok .checkmark { background: #0a101f; }
+.checkmark:after {
+  content: ''; position: absolute; left: 4px; top: 2px; width: 4px; height: 8px;
+  border: solid #63d297; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
