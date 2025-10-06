@@ -450,12 +450,24 @@ async function connectMetaMask() {
     setWalletUI({ ok: false, message: 'MetaMask not detected' });
     return null;
   }
-  const provider = new ethers.BrowserProvider(window.ethereum);
-  const accounts = await provider.send('eth_requestAccounts', []); // prompts MetaMask
-  const signer = await provider.getSigner();
-  const net = await provider.getNetwork();
-  setWalletUI({ ok: true, account: accounts[0], chainId: Number(net.chainId) });
-  return { provider, signer };
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const accounts = await provider.send('eth_requestAccounts', []); // prompts MetaMask
+    if (!accounts || !accounts.length) {
+      setWalletUI({ ok: false, message: 'No account returned' });
+      return null;
+    }
+    const signer = await provider.getSigner();
+    const net = await provider.getNetwork();
+    setWalletUI({ ok: true, account: accounts[0], chainId: Number(net.chainId) });
+    return { provider, signer };
+  } catch (e) {
+    // 4001: user rejected
+    const msg = (e && e.code === 4001) ? 'Request rejected in MetaMask' : (e?.message || String(e));
+    setWalletUI({ ok: false, message: msg });
+    console.warn('MetaMask connect error:', e);
+    return null;
+  }
 }
 
 
