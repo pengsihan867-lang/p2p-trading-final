@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SolarCoin P2P Trading Sandbox</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1>SolarCoin P2P Trading</h1>
+      <p class="subtitle">Day-ahead sandbox with mock wallets and on-page simulation</p>
+    </header>
+
+    <section class="controls">
+      <div class="card">
+        <h2>Prosumer 1 — Input Demand</h2>
+        <div class="row">
+          <label for="demandInput">Daily demand (kWh):</label>
+          <input id="demandInput" type="number" min="1" step="0.5" value="20" />
+          <button id="runBtn">Run Simulation</button>
+        </div>
+        <p class="hint">This page simulates 4 prosumers over 24 hours at 5‑minute resolution (288 steps). P2P internal price is the midpoint between external buy/sell prices.</p>
+      </div>
+
+      <div class="card grid-2">
+        <div>
+          <h3>Key Settings</h3>
+          <ul class="compact">
+            <li>Time step: 5 minutes (288 per day)</li>
+            <li>Currency: SLR (SolarCoin)</li>
+            <li>Initial wallet balance: 100 SLR each</li>
+            <li>External prices: TOU buy/sell curve</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Summary (Community)</h3>
+          <ul id="summaryCommunity" class="compact"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="charts">
+      <div class="card">
+        <h2>Energy Flows (kWh per step)</h2>
+        <canvas id="energyChart" height="120"></canvas>
+      </div>
+
+      <div class="card">
+        <h2>Transaction Amounts (SLR per step)</h2>
+        <canvas id="amountChart" height="120"></canvas>
+      </div>
+
+      <div class="card grid-2">
+        <div>
+          <h2>VPP External Transactions</h2>
+          <canvas id="donutChart" height="200"></canvas>
+        </div>
+        <div>
+          <h2>SolarCoin Balance (end of day)</h2>
+          <canvas id="balanceChart" height="200"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="cards">
+      <div class="card">
+        <h2>Prosumer 1 — Daily Summary</h2>
+        <ul id="summaryP1" class="compact"></ul>
+      </div>
+      <div class="card">
+        <h2>Export</h2>
+        <button id="downloadCsvBtn">Download settlements CSV</button>
+        <p class="hint">CSV contains internal trades (matched energy and price) and external buys/sells aggregated per step.</p>
+      </div>
+    </section>
+
+    <footer>
+      <p>Static dApp for demonstration. No real blockchain transactions are made on this page.</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+  </html>
+
