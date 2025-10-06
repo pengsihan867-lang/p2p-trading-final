@@ -23,6 +23,7 @@
           <label for="demandInput">Daily demand (kWh):</label>
           <input id="demandInput" type="number" min="1" step="0.5" value="20" />
           <button id="runBtn">Run Simulation</button>
+          <button id="openLedgerBtn" title="Open the day ledger in a new page">Open Ledger</button>
         </div>
         <p class="hint">This page simulates 4 prosumers over 24 hours at 5‑minute resolution (288 steps). P2P internal price is the midpoint between external buy/sell prices.</p>
       </div>
@@ -40,6 +41,33 @@
         <div>
           <h3>Summary (Community)</h3>
           <ul id="summaryCommunity" class="compact"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="cards">
+      <div class="card">
+        <h2>Wallet & On‑chain Demo (MetaMask, optional)</h2>
+        <p class="hint">Connect MetaMask to view your address and test ERC‑20 interactions on a test network. Provide an ERC‑20 token address if you want to try approve/transfer. This page does not hold keys and signs only in your wallet.</p>
+        <div class="row" style="flex-wrap: wrap; gap:10px; margin-bottom: 8px;">
+          <button id="connectBtn">Connect MetaMask</button>
+          <button id="switchSepoliaBtn">Switch to Sepolia</button>
+          <span id="walletInfo" class="hint"></span>
+        </div>
+        <div class="grid-2">
+          <div>
+            <h3>Token Settings</h3>
+            <div class="row"><label style="width:160px">ERC‑20 token address</label><input id="tokenAddr" style="width:360px" placeholder="0x..." /></div>
+            <div class="row"><label style="width:160px">Settlement address</label><input id="settleAddr" style="width:360px" placeholder="0x... (spender)" /></div>
+            <div class="row"><label style="width:160px">Approve amount (SLR)</label><input id="approveAmt" type="number" step="0.01" value="10" /></div>
+            <div class="row"><button id="approveBtn">Approve</button><span id="approveMsg" class="hint"></span></div>
+          </div>
+          <div>
+            <h3>Simple Transfer</h3>
+            <div class="row"><label style="width:160px">To address</label><input id="transferTo" style="width:360px" placeholder="0x..." /></div>
+            <div class="row"><label style="width:160px">Amount (SLR)</label><input id="transferAmt" type="number" step="0.01" value="1" /></div>
+            <div class="row"><button id="transferBtn">Transfer</button><span id="transferMsg" class="hint"></span></div>
+          </div>
         </div>
       </div>
     </section>
@@ -83,7 +111,7 @@
       <p>Static dApp for demonstration. No real blockchain transactions are made on this page.</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.12.1/dist/ethers.umd.min.js"></script>
     <script src="app.js"></script>
   </body>
   </html>
-
