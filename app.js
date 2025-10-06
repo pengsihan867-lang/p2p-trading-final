@@ -431,7 +431,7 @@ function setWalletUI({ account, chainId, ok, message }) {
   const info = document.getElementById('walletInfo');
   const badge = document.getElementById('walletBadge');
   if (ok) {
-    badge.textContent = 'Connected to MetaMask';
+    badge.innerHTML = '<span class="checkmark"></span>Connected';
     badge.classList.remove('hidden');
     badge.classList.add('ok');
     badge.classList.remove('err');
