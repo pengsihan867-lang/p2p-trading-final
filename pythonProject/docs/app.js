@@ -322,6 +322,30 @@ function renderCharts(r) {
   );
 }
 
+function renderEmptyCharts() {
+  const empty = { labels: [], datasets: [] };
+  energyChart = makeOrUpdateChart(
+    energyChart,
+    document.getElementById("energyChart"),
+    { type: "line", data: empty, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { title: { text: "kWh/step", display: true } } } } }
+  );
+  amountChart = makeOrUpdateChart(
+    amountChart,
+    document.getElementById("amountChart"),
+    { type: "line", data: empty, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { title: { text: "SLR/step", display: true } } } } }
+  );
+  donutChart = makeOrUpdateChart(
+    donutChart,
+    document.getElementById("donutChart"),
+    { type: "doughnut", data: { labels: [], datasets: [] }, options: { plugins: { legend: { display: false } } } }
+  );
+  balanceChart = makeOrUpdateChart(
+    balanceChart,
+    document.getElementById("balanceChart"),
+    { type: "bar", data: { labels: [], datasets: [] }, options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } }
+  );
+}
+
 function downloadCSV(r) {
   const rows = [
     ["time", "internal_kWh", "ext_import_kWh", "ext_export_kWh", "internal_amount_SLR", "external_net_SLR"],
@@ -370,7 +394,10 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("openLedgerBtn").addEventListener("click", () => {
     window.open('ledger.html', '_blank');
   });
-  lastRun = run();
+  // Initial empty state (no charts until Run)
+  renderEmptyCharts();
+  document.getElementById('summaryCommunity').innerHTML = '<li>Run the simulation to see community results here.</li>';
+  document.getElementById('summaryP1').innerHTML = '<li>Run the simulation to see your daily summary here.</li>';
   // Wallet overlay logic
   const overlay = document.getElementById('connectOverlay');
   const showOverlay = () => overlay.classList.remove('hidden');
@@ -424,6 +451,21 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // Disconnect button — try revoke permissions; otherwise just clear UI
+  const disconnectBtn = document.getElementById('disconnectBtn');
+  disconnectBtn.addEventListener('click', async () => {
+    try { localStorage.removeItem('solarcoin_wallet_seen'); } catch {}
+    try {
+      if (window.ethereum?.request) {
+        await window.ethereum.request({ method: 'wallet_revokePermissions', params: [{ eth_accounts: {} }] });
+      }
+    } catch (e) {
+      console.warn('wallet_revokePermissions not available or failed:', e?.message || e);
+    }
+    cachedSigner = null;
+    setWalletUI({ ok: false, message: 'Disconnected' });
+  });
 });
 
 // ---------------------- MetaMask / Ethers demo ----------------------
