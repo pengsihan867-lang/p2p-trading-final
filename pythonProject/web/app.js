@@ -108,6 +108,10 @@ function simulate(dayDemandsKWh) {
   const internalAmount = new Array(T).fill(0); // SLR/step
   const externalAmount = new Array(T).fill(0); // net SLR/step paid to grid (>0 cost, <0 revenue)
 
+  // Ledger: list of transactions
+  // {time,label,type:'internal'|'import'|'export', buyer, seller, energy, price, amount}
+  const ledger = [];
+
   // Per-user tallies
   const user = names.map(() => ({
     pv: 0,
@@ -139,22 +143,29 @@ function simulate(dayDemandsKWh) {
     const matched = Math.min(S, D);
     internalEnergy[t] = matched;
 
-    // allocate proportionally
-    // sellers: internal sold
-    for (const s of sellers) {
-      const share = S > 0 ? (s.e * matched) / S : 0;
-      user[s.i].internal_sell += share;
-      const amount = share * lambda[t];
-      user[s.i].earn_internal += amount;
-      wallet[s.i] += amount;
-    }
-    // buyers: internal buy
-    for (const b of buyers) {
-      const share = D > 0 ? (b.e * matched) / D : 0;
-      user[b.i].internal_buy += share;
-      const amount = share * lambda[t];
-      user[b.i].pay_internal += amount;
-      wallet[b.i] -= amount;
+    // allocate proportionally — and build pairwise internal trades ledger
+    const sellersAlloc = sellers.map(s => ({ i: s.i, rem: S > 0 ? (s.e * matched) / S : 0 }));
+    const buyersAlloc = buyers.map(b => ({ i: b.i, rem: D > 0 ? (b.e * matched) / D : 0 }));
+    let si = 0, bi = 0;
+    while (si < sellersAlloc.length && bi < buyersAlloc.length) {
+      const s = sellersAlloc[si];
+      const b = buyersAlloc[bi];
+      const m = Math.min(s.rem, b.rem);
+      if (m <= 1e-12) { if (s.rem <= 1e-12) si++; if (b.rem <= 1e-12) bi++; continue; }
+      // record
+      user[s.i].internal_sell += m;
+      user[b.i].internal_buy += m;
+      const amt = m * lambda[t];
+      user[s.i].earn_internal += amt;
+      user[b.i].pay_internal += amt;
+      wallet[s.i] += amt;
+      wallet[b.i] -= amt;
+      ledger.push({
+        time: t, label: timeLabels()[t], type: 'internal', buyer: names[b.i], seller: names[s.i], energy: m, price: lambda[t], amount: amt,
+      });
+      s.rem -= m; b.rem -= m;
+      if (s.rem <= 1e-12) si++;
+      if (b.rem <= 1e-12) bi++;
     }
 
     // residuals -> external
@@ -180,6 +191,7 @@ function simulate(dayDemandsKWh) {
         user[b.i].pay_external += cost;
         wallet[b.i] -= cost;
         extBuyEnergy[t] += importE;
+        ledger.push({ time: t, label: timeLabels()[t], type: 'import', buyer: names[b.i], seller: 'GRID', energy: importE, price: prices.buy[t], amount: cost });
       }
     }
 
@@ -207,6 +219,7 @@ function simulate(dayDemandsKWh) {
     walletEnd: wallet,
     user,
     community,
+    ledger,
   };
 }
 
@@ -338,6 +351,8 @@ function run() {
   const dayDemands = [...DEFAULT_DEMANDS];
   dayDemands[0] = demandP1;
   const r = simulate(dayDemands);
+  // persist ledger for the ledger page
+  try { localStorage.setItem('solarcoin_ledger', JSON.stringify(r.ledger)); } catch {}
   renderCommunitySummary(r);
   renderP1Summary(r);
   renderCharts(r);
@@ -352,6 +367,96 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("downloadCsvBtn").addEventListener("click", () => {
     lastRun && downloadCSV(lastRun);
   });
+  document.getElementById("openLedgerBtn").addEventListener("click", () => {
+    window.open('ledger.html', '_blank');
+  });
   lastRun = run();
 });
 
+// ---------------------- MetaMask / Ethers demo ----------------------
+async function connectMetaMask() {
+  if (!window.ethereum) {
+    document.getElementById('walletInfo').textContent = 'MetaMask not detected';
+    return null;
+  }
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const accounts = await provider.send('eth_requestAccounts', []);
+  const signer = await provider.getSigner();
+  const net = await provider.getNetwork();
+  document.getElementById('walletInfo').textContent = `Connected: ${accounts[0]} | chainId ${Number(net.chainId)}`;
+  return { provider, signer };
+}
+
+async function switchToSepolia() {
+  if (!window.ethereum) return;
+  try {
+    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0xaa36a7' }] });
+  } catch (e) {
+    // add if missing
+    if (e.code === 4902) {
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: '0xaa36a7', chainName: 'Sepolia', nativeCurrency: { name: 'Sepolia ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://rpc.sepolia.org'], blockExplorerUrls: ['https://sepolia.etherscan.io']
+        }]
+      });
+    }
+  }
+}
+
+function erc20Contract(providerOrSigner, address) {
+  const abi = [
+    'function balanceOf(address) view returns (uint256)',
+    'function allowance(address owner, address spender) view returns (uint256)',
+    'function approve(address spender, uint256 value) returns (bool)',
+    'function transfer(address to, uint256 value) returns (bool)',
+    'function decimals() view returns (uint8)',
+    'event Transfer(address indexed from, address indexed to, uint256 value)'
+  ];
+  return new ethers.Contract(address, abi, providerOrSigner);
+}
+
+let cachedSigner = null;
+document.getElementById('connectBtn').addEventListener('click', async () => {
+  const ctx = await connectMetaMask();
+  cachedSigner = ctx ? ctx.signer : null;
+});
+document.getElementById('switchSepoliaBtn').addEventListener('click', switchToSepolia);
+
+document.getElementById('approveBtn').addEventListener('click', async () => {
+  try {
+    if (!cachedSigner) { document.getElementById('approveMsg').textContent = 'Connect wallet first'; return; }
+    const tokenAddr = document.getElementById('tokenAddr').value.trim();
+    const spender = document.getElementById('settleAddr').value.trim();
+    const amt = parseFloat(document.getElementById('approveAmt').value || '0');
+    if (!ethers.isAddress(tokenAddr) || !ethers.isAddress(spender) || !(amt > 0)) { document.getElementById('approveMsg').textContent = 'Invalid inputs'; return; }
+    const c = erc20Contract(cachedSigner, tokenAddr);
+    const decimals = await c.decimals().catch(() => 18);
+    const value = ethers.parseUnits(String(amt), decimals);
+    const tx = await c.approve(spender, value);
+    document.getElementById('approveMsg').textContent = `Tx sent: ${tx.hash.slice(0,10)}…`;
+    await tx.wait();
+    document.getElementById('approveMsg').textContent = 'Approved (confirmed)';
+  } catch (e) {
+    document.getElementById('approveMsg').textContent = e?.message?.slice(0,120) || String(e);
+  }
+});
+
+document.getElementById('transferBtn').addEventListener('click', async () => {
+  try {
+    if (!cachedSigner) { document.getElementById('transferMsg').textContent = 'Connect wallet first'; return; }
+    const tokenAddr = document.getElementById('tokenAddr').value.trim();
+    const to = document.getElementById('transferTo').value.trim();
+    const amt = parseFloat(document.getElementById('transferAmt').value || '0');
+    if (!ethers.isAddress(tokenAddr) || !ethers.isAddress(to) || !(amt > 0)) { document.getElementById('transferMsg').textContent = 'Invalid inputs'; return; }
+    const c = erc20Contract(cachedSigner, tokenAddr);
+    const decimals = await c.decimals().catch(() => 18);
+    const value = ethers.parseUnits(String(amt), decimals);
+    const tx = await c.transfer(to, value);
+    document.getElementById('transferMsg').textContent = `Tx sent: ${tx.hash.slice(0,10)}…`;
+    await tx.wait();
+    document.getElementById('transferMsg').textContent = 'Transfer confirmed';
+  } catch (e) {
+    document.getElementById('transferMsg').textContent = e?.message?.slice(0,120) || String(e);
+  }
+});
