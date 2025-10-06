@@ -382,7 +382,6 @@ window.addEventListener("DOMContentLoaded", () => {
       try { localStorage.setItem('solarcoin_wallet_seen', '1'); } catch {}
     }
   });
-  document.getElementById('overlaySepolia').addEventListener('click', switchToSepolia);
   document.getElementById('overlaySkip').addEventListener('click', hideOverlay);
 
   // Try silent connect; if not connected and first visit, show overlay
@@ -394,7 +393,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (accts && accts.length > 0) {
         const signer = await provider.getSigner();
         const net = await provider.getNetwork();
-        document.getElementById('walletInfo').textContent = `Connected: ${accts[0]} | chainId ${Number(net.chainId)}`;
+        setWalletUI({ ok: true, account: accts[0], chainId: Number(net.chainId) });
         try { localStorage.setItem('solarcoin_wallet_seen', '1'); } catch {}
       } else {
         const seen = localStorage.getItem('solarcoin_wallet_seen');
@@ -404,38 +403,61 @@ window.addEventListener("DOMContentLoaded", () => {
       // ignore
     }
   })();
+
+  // React to MetaMask changes
+  if (window.ethereum) {
+    window.ethereum.on?.('accountsChanged', async (accs) => {
+      if (accs && accs.length) {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const net = await provider.getNetwork();
+        setWalletUI({ ok: true, account: accs[0], chainId: Number(net.chainId) });
+      } else {
+        setWalletUI({ ok: false, message: 'Disconnected' });
+      }
+    });
+    window.ethereum.on?.('chainChanged', async () => {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const accts = await provider.send('eth_accounts', []);
+      if (accts && accts.length) {
+        const net = await provider.getNetwork();
+        setWalletUI({ ok: true, account: accts[0], chainId: Number(net.chainId) });
+      }
+    });
+  }
 });
 
 // ---------------------- MetaMask / Ethers demo ----------------------
+function setWalletUI({ account, chainId, ok, message }) {
+  const info = document.getElementById('walletInfo');
+  const badge = document.getElementById('walletBadge');
+  if (ok) {
+    badge.textContent = 'Connected to MetaMask';
+    badge.classList.remove('hidden');
+    badge.classList.add('ok');
+    badge.classList.remove('err');
+    info.textContent = `Connected: ${account} | chainId ${chainId}`;
+  } else {
+    badge.textContent = 'Not connected';
+    badge.classList.remove('ok');
+    badge.classList.add('err');
+    badge.classList.remove('hidden');
+    info.textContent = message || 'Not connected';
+  }
+}
+
 async function connectMetaMask() {
   if (!window.ethereum) {
-    document.getElementById('walletInfo').textContent = 'MetaMask not detected';
+    setWalletUI({ ok: false, message: 'MetaMask not detected' });
     return null;
   }
   const provider = new ethers.BrowserProvider(window.ethereum);
-  const accounts = await provider.send('eth_requestAccounts', []);
+  const accounts = await provider.send('eth_requestAccounts', []); // prompts MetaMask
   const signer = await provider.getSigner();
   const net = await provider.getNetwork();
-  document.getElementById('walletInfo').textContent = `Connected: ${accounts[0]} | chainId ${Number(net.chainId)}`;
+  setWalletUI({ ok: true, account: accounts[0], chainId: Number(net.chainId) });
   return { provider, signer };
 }
 
-async function switchToSepolia() {
-  if (!window.ethereum) return;
-  try {
-    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0xaa36a7' }] });
-  } catch (e) {
-    // add if missing
-    if (e.code === 4902) {
-      await window.ethereum.request({
-        method: 'wallet_addEthereumChain',
-        params: [{
-          chainId: '0xaa36a7', chainName: 'Sepolia', nativeCurrency: { name: 'Sepolia ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://rpc.sepolia.org'], blockExplorerUrls: ['https://sepolia.etherscan.io']
-        }]
-      });
-    }
-  }
-}
 
 function erc20Contract(providerOrSigner, address) {
   const abi = [
@@ -454,9 +476,10 @@ document.getElementById('connectBtn').addEventListener('click', async () => {
   const ctx = await connectMetaMask();
   cachedSigner = ctx ? ctx.signer : null;
 });
-document.getElementById('switchSepoliaBtn').addEventListener('click', switchToSepolia);
 
-document.getElementById('approveBtn').addEventListener('click', async () => {
+// Guarded: Advanced ERC-20 handlers exist only if advanced UI is present
+const approveBtnEl = document.getElementById('approveBtn');
+if (approveBtnEl) approveBtnEl.addEventListener('click', async () => {
   try {
     if (!cachedSigner) { document.getElementById('approveMsg').textContent = 'Connect wallet first'; return; }
     const tokenAddr = document.getElementById('tokenAddr').value.trim();
@@ -475,7 +498,8 @@ document.getElementById('approveBtn').addEventListener('click', async () => {
   }
 });
 
-document.getElementById('transferBtn').addEventListener('click', async () => {
+const transferBtnEl = document.getElementById('transferBtn');
+if (transferBtnEl) transferBtnEl.addEventListener('click', async () => {
   try {
     if (!cachedSigner) { document.getElementById('transferMsg').textContent = 'Connect wallet first'; return; }
     const tokenAddr = document.getElementById('tokenAddr').value.trim();

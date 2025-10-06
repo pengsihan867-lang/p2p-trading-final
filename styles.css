@@ -70,3 +70,9 @@ footer { text-align: center; color: var(--muted); padding: 20px; font-size: 12px
 .overlay.hidden { display: none; }
 .overlay-card { width: min(560px, 92%); background: var(--card); padding: 18px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.45); }
 .ghost { background: transparent; border: 1px solid rgba(255,255,255,0.18); color: var(--text); }
+
+/* Badge for connection status */
+.badge { display:inline-block; padding:6px 10px; border-radius: 999px; font-weight: 600; font-size: 12px; border:1px solid rgba(255,255,255,0.15); background: rgba(99,210,151,0.1); color: var(--text); }
+.badge.ok { background: linear-gradient(90deg, #329d6f, #63d297); color: #0a101f; border-color: rgba(0,0,0,0); }
+.badge.err { background: rgba(255,124,181,0.15); color: #ffb3cf; border-color: rgba(255,124,181,0.4); }
+.hidden { display:none; }
