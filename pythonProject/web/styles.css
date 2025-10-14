@@ -18,6 +18,30 @@ body {
   color: var(--text);
 }
 
+/* Top‑right logo badge */
+.logo-badge {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  z-index: 100;
+  /* Subtle ring and glow to match dark gradient */
+  box-shadow: 0 6px 20px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.08);
+  background: radial-gradient(120px 80px at 40% 10%, #202654 0%, #0f1222 70%);
+}
+.logo-badge img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: block;
+  /* Blend slightly into dark theme so白底不突兀 */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
 header {
   padding: 28px 20px 8px;
   text-align: center;
